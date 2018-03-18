@@ -1,0 +1,18 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}OGN receiver configuration page{% endblock %}
+
+{% block navbar %}
+{{nav.mynavbar.render()}}
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+	<div class="alert alert-danger">
+	  <strong>Danger!</strong> Process 'ogn-rf' is not running
+	</div>
+	
+	<div class="alert alert-danger">
+	  <strong>Danger!</strong> Process 'ogn-decode' is not running
+	</div>
+	</div>
+{% endblock %}

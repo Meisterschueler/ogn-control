@@ -1,0 +1,7 @@
+Flask==0.12
+Flask-SocketIO==2.8.4
+eventlet==0.20.1
+Flask-Bootstrap==3.3.7.1
+Flask-Nav==0.6
+#ogn-client==0.8.2
+ -e git+git://github.com/Meisterschueler/python-ogn-client@feature/+telnet_parser#egg=python-ogn-client

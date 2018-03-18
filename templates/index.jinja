@@ -1,0 +1,140 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}OGN receiver realtime data{% endblock %}
+
+{% block navbar %}
+{{nav.mynavbar.render()}}
+{% endblock %}
+
+{% block scripts %}
+	<script type="text/javascript" src="static/js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="static/js/socket.io.min.js"></script>
+    <script type="text/javascript" src="static/js/jquery.flot.min.js"></script>
+    <script type="text/javascript" src="static/js/jquery.flot.time.min.js"></script>
+    <script type="text/javascript" src="static/js/jquery.flot.axislabels-min.js"></script>
+    <link rel="stylesheet" href="static/css/mystyle.css"></link>
+    <script type="text/javascript" charset="utf-8">
+
+$(document).ready(function() {
+    namespace = '/test';
+    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+    socket.on('connect', function() {
+        socket.emit('my_event', {data: 'I\'m connected!'});
+    });
+    socket.on('raw_data', function(msg) {
+        $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
+    });
+    
+    // receive data and put it into 'devices' dictionary
+    var last_timestamp = 0;
+    var devices = {};
+    var color=0;
+    var gridNeedsUpdate = true;
+    socket.on('ogn_data', function(msg) {
+        //$('#log').append('<br>' + $('<div/>').text('Address: ' + msg.address + ', timestamp: ' + msg.timestamp + ', signal quality: ' + msg.signal_quality + ', error count: ' + msg.error_count).html());
+        
+        var device;
+        if (msg.address in devices) {
+        	device = devices[msg.address];
+        } else {
+        	device = {
+        			'timestamp': [],
+        			'signal_quality': [],
+        			'error_count': [],
+        			'color': color,
+        	};
+        	devices[msg.address] = device;
+			color=color+1;
+        	gridNeedsUpdate=true;
+        }
+    	device['timestamp'].push(msg.timestamp * 1000);
+    	device['signal_quality'].push(msg.signal_quality);
+    	device['error_count'].push(msg.error_count);
+    	
+    	last_timestamp = msg.timestamp * 1000;
+    });
+
+    $('form#emit').submit(function(event) {
+        socket.emit('my_event', {data: $('#emit_data').val()});
+        return false;
+    });
+
+
+	// setup plots
+    var options = {
+      grid: {
+    	  borderColor:'#ccc'
+    	  },
+      series: {
+    	  shadowSize:0,
+    	  color:"#33ff33"
+    	  },
+      yaxis: {
+    	  show:true,
+    	  min:0, max:60,
+    	  axisLabel: 'Noise [dB]'
+    	  },
+      xaxis: {
+    	  show:true,
+    	  mode: "time",
+    	  timeformat: "%H:%M:%S",
+    	  minTickSize: [1, "second"],
+    	  axisLabel: 'Time',
+    	  }
+    };
+	
+	var plot = $.plot("#placeholder", [], options);
+	
+	var updateInterval = 500;
+	
+	function update() {
+		var datasets = [];
+		for (var key in devices) {
+			var device = devices[key];
+			var values = device['timestamp'].map(function (e, i) {
+			    return [e, device['signal_quality'][i]];
+			});
+			
+			var dataset = {
+				color: device['color'],
+				label: key,
+				data: values,
+			};
+			
+			datasets.push(dataset)
+		}
+		plot.setData( datasets );
+		
+		var opts = plot.getOptions()
+		if (last_timestamp > opts.xaxes[0].max - (10 * 1000)) {
+			opts.xaxes[0].min = last_timestamp - (100 * 1000);
+			opts.xaxes[0].max = last_timestamp + (10 * 1000);
+			gridNeedsUpdate=true;
+		}
+		
+		if (gridNeedsUpdate) {
+			plot.setupGrid()
+			gridNeedsUpdate=false;
+		};
+		plot.draw();
+		setTimeout(update, updateInterval);
+	}
+	
+	update();
+	
+});
+
+    </script>
+{% endblock %}
+
+
+{% block content %}
+	<div class="demo-container">
+		<div id="placeholder" class="demo-placeholder"></div>
+	</div>
+
+	<div class="container">
+    <label for="log">Receive:</label>
+    <div id="log"></div>
+    </div>
+ 
+ {% endblock %}
