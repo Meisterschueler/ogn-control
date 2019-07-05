@@ -1,5 +1,5 @@
 Flask==0.12
-Flask-SocketIO==2.8.4
+Flask-SocketIO==4.1.0
 eventlet==0.25.0
 Flask-Bootstrap==3.3.7.1
 Flask-Nav==0.6
