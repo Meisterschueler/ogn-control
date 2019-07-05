@@ -1,6 +1,6 @@
 Flask==0.12
 Flask-SocketIO==2.8.4
-eventlet==0.20.1
+eventlet==0.25.0
 Flask-Bootstrap==3.3.7.1
 Flask-Nav==0.6
 #ogn-client==0.8.2
