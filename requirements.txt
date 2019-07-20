@@ -4,4 +4,4 @@ eventlet==0.25.0
 Flask-Bootstrap==3.3.7.1
 Flask-Nav==0.6
 #ogn-client==0.8.2
- -e git+git://github.com/Meisterschueler/python-ogn-client@feature/+telnet_parser#egg=python-ogn-client
+ -e git+git://github.com/Meisterschueler/python-ogn-client#egg=python-ogn-client
