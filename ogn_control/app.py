@@ -56,28 +56,28 @@ def test_connect():
 
 
 @app.route('/')
-@app.route('/index.html')
-def index():
-    return render_template('index.jinja')
+@app.route('/flot.html')
+def flot():
+    return render_template('flot.html')
 
 
-@app.route('/config.html')
-def config():
-    return render_template('config.jinja')
+@app.route('/chartsjs.html')
+def chartsjs():
+    return render_template('chartsjs.html')
 
 
-@app.route('/thisnthat.html')
-def thisnthat():
-    return render_template('thisnthat.jinja')
+@app.route('/plotly.html')
+def plotly():
+    return render_template('plotly.html')
 
 
 @nav.navigation()
 def mynavbar():
     return Navbar(
         'OGN Receiver',
-        View('Home', 'index'),
-        View('Configuration', 'config'),
-        View('Thisnthat', 'thisnthat'),
+        View('Flot', 'flot'),
+        View('Charts.js', 'chartsjs'),
+        View('plotly', 'plotly'),
     )
 
 nav.init_app(app)
