@@ -19,7 +19,7 @@ from datetime import timezone
 
 
 def background_thread2():
-    data_strings = [line.rstrip('\n') for line in open('output.txt')]
+    data_strings = [line.rstrip('\n') for line in open('telnet_logfile.txt')]
 
     while True:
         for raw_message in data_strings:
