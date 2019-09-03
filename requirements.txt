@@ -2,6 +2,4 @@ Flask==1.1.1
 Flask-SocketIO==4.2.1
 eventlet==0.25.1
 Flask-Bootstrap==3.3.7.1
-Flask-Nav==0.6
-#ogn-client==0.8.2
- -e git+git://github.com/Meisterschueler/python-ogn-client#egg=python-ogn-client
+ogn-client==0.9.4

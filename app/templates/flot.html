@@ -1,9 +1,4 @@
-{% extends "bootstrap/base.html" %}
-{% block title %}OGN receiver realtime data{% endblock %}
-
-{% block navbar %}
-{{ nav.mynavbar.render() }}
-{% endblock %}
+{% extends "base.html" %}
 
 {% block scripts %}
 	<script type="text/javascript" src="static/js/jquery-1.4.2.min.js"></script>
@@ -30,7 +25,7 @@ $(document).ready(function() {
     var color=0;
     var gridNeedsUpdate = true;
     socket.on('ogn_data', function(msg) {
-        //$('#log').append('<br>' + $('<div/>').text('Address: ' + msg.address + ', timestamp: ' + msg.timestamp + ', signal quality: ' + msg.signal_quality + ', error count: ' + msg.error_count).html());
+        //$('#log').append('<br>' + $('<div/>').text('Address: ' + msg.address + ', timestamp: ' + msg.timestamp_int + ', signal quality: ' + msg.signal_quality + ', error count: ' + msg.error_count).html());
         
         var device;
         if (msg.address in devices) {
@@ -46,11 +41,11 @@ $(document).ready(function() {
 			color=color+1;
         	gridNeedsUpdate=true;
         }
-    	device['timestamp'].push(msg.timestamp * 1000);
+    	device['timestamp'].push(msg.timestamp_int * 1000);
     	device['signal_quality'].push(msg.signal_quality);
     	device['error_count'].push(msg.error_count);
     	
-    	last_timestamp = msg.timestamp * 1000;
+    	last_timestamp = msg.timestamp_int * 1000;
     });
 
     $('form#emit').submit(function(event) {
@@ -127,7 +122,7 @@ $(document).ready(function() {
 {% endblock %}
 
 
-{% block content %}
+{% block app_content %}
 	<div class="demo-container">
 		<div id="placeholder" class="demo-placeholder"></div>
 	</div>

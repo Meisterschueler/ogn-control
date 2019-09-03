@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+	<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.4.2.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/plotly-latest.min.js') }}"></script>
+    <script type="text/javascript" charset="utf-8">
+    
+function getData() {
+    return Math.random();
+}
+    
+$(document).ready(function() {
+    namespace = '/test';
+    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+    var devices = {};
+    
+    socket.on('connect', function() {
+        socket.emit('my_event', {data: 'I\'m connected!'});
+    });
+
+    Plotly.plot('plotly_chart', []);
+    var trace = 0
+    socket.on('ogn_data', function(msg) {
+        if (msg.address in devices) {
+            device = devices[msg.address]
+            if (msg.timestamp_int - device['timestamp'] > 1) {
+                Plotly.extendTraces('plotly_chart', {y: [[null]]}, [device.trace])            
+            }
+            Plotly.extendTraces('plotly_chart', {x: [[msg.timestamp_str]], y: [[msg.signal_quality]]}, [device.trace])            
+            devices[msg.address]['timestamp'] = msg.timestamp_int;
+        } else {
+            Plotly.addTraces('plotly_chart', [{
+                x: [msg.timestamp_str],
+                y: [msg.signal_quality],
+                mode: 'lines+markers',
+                name: msg.address,
+            }]);
+            devices[msg.address] = {'trace': trace, 'timestamp': msg.timestamp_int}
+            trace += 1;
+        }
+    });
+});
+    
+    </script>
+{% endblock %}
+
+
+{% block app_content %}
+	<div class="container">
+    <div id="plotly_chart"><!-- Plotly chart will be drawn inside this DIV --></div>
+    </div>
+ 
+ {% endblock %}

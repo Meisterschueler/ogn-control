@@ -1,9 +1,4 @@
-{% extends "bootstrap/base.html" %}
-{% block title %}OGN receiver status page{% endblock %}
-
-{% block navbar %}
-{{nav.mynavbar.render()}}
-{% endblock %}
+{% extends "base.html" %}
 
 {% block scripts %}
 	<script type="text/javascript" src="static/js/jquery-1.4.2.min.js"></script>
@@ -15,9 +10,6 @@ $(document).ready(function() {
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
     socket.on('connect', function() {
         socket.emit('my_event', {data: 'I\'m connected!'});
-    });
-    socket.on('raw_data', function(msg) {
-        $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
     });
     socket.on('ogn_data', function(msg) {
         $('#log').append('<br>' + $('<div/>').text('Address: ' + msg.address + ', signal quality: ' + msg.signal_quality + ', error count: ' + msg.error_count).html());
@@ -33,7 +25,7 @@ $(document).ready(function() {
 {% endblock %}
 
 
-{% block content %}
+{% block app_content %}
 	<div class="container">
     <form id="emit" method="POST" action='#'>
     	<label for="emit_data">Send:</label>
