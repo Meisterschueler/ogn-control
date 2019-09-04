@@ -12,11 +12,9 @@
 $(document).ready(function() {
     namespace = '/test';
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+    
     socket.on('connect', function() {
         socket.emit('my_event', {data: 'I\'m connected!'});
-    });
-    socket.on('raw_data', function(msg) {
-        $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
     });
     
     // receive data and put it into 'devices' dictionary
@@ -25,8 +23,6 @@ $(document).ready(function() {
     var color=0;
     var gridNeedsUpdate = true;
     socket.on('ogn_data', function(msg) {
-        //$('#log').append('<br>' + $('<div/>').text('Address: ' + msg.address + ', timestamp: ' + msg.timestamp_int + ', signal quality: ' + msg.signal_quality + ', error count: ' + msg.error_count).html());
-        
         var device;
         if (msg.address in devices) {
         	device = devices[msg.address];
@@ -41,16 +37,11 @@ $(document).ready(function() {
 			color=color+1;
         	gridNeedsUpdate=true;
         }
-    	device['timestamp'].push(msg.timestamp_int * 1000);
+    	device['timestamp'].push(msg.timestamp * 1000);
     	device['signal_quality'].push(msg.signal_quality);
     	device['error_count'].push(msg.error_count);
     	
-    	last_timestamp = msg.timestamp_int * 1000;
-    });
-
-    $('form#emit').submit(function(event) {
-        socket.emit('my_event', {data: $('#emit_data').val()});
-        return false;
+    	last_timestamp = msg.timestamp * 1000;
     });
 
 
@@ -74,7 +65,10 @@ $(document).ready(function() {
     	  timeformat: "%H:%M:%S",
     	  minTickSize: [1, "second"],
     	  axisLabel: 'Time',
-    	  }
+    	  },
+      legend: {
+          position: "nw"
+          },
     };
 	
 	var plot = $.plot("#placeholder", [], options);
@@ -125,11 +119,5 @@ $(document).ready(function() {
 {% block app_content %}
 	<div class="demo-container">
 		<div id="placeholder" class="demo-placeholder"></div>
-	</div>
-
-	<div class="container">
-    <label for="log">Receive:</label>
-    <div id="log"></div>
-    </div>
- 
+	</div> 
  {% endblock %}

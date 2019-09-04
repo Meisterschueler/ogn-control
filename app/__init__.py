@@ -35,16 +35,14 @@ def background_thread2():
             # print("WTF: %s" % raw_message)
             continue
 
-        message["timestamp_int"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
-        message["timestamp_str"] = message["timestamp"].strftime("%Y-%m-%d %H:%M:%S")
-        del message["timestamp"]
+        message["timestamp"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
 
         if timestamp is None:
-            timestamp = message["timestamp_int"]
+            timestamp = message["timestamp"]
 
         socketio.emit("ogn_data", message, namespace="/test")
-        if timestamp != message["timestamp_int"]:
-            timestamp = message["timestamp_int"]
+        if timestamp != message["timestamp"]:
+            timestamp = message["timestamp"]
             socketio.sleep(1.0)
 
 
@@ -74,11 +72,6 @@ def test_connect():
 @app.route("/flot.html")
 def flot():
     return render_template("flot.html", title="Flot")
-
-
-@app.route("/chartjs.html")
-def chartjs():
-    return render_template("chartjs.html", title="Chart.js")
 
 
 @app.route("/plotly.html")

@@ -8,9 +8,11 @@
 $(document).ready(function() {
     namespace = '/test';
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+    
     socket.on('connect', function() {
         socket.emit('my_event', {data: 'I\'m connected!'});
     });
+    
     socket.on('ogn_data', function(msg) {
         $('#log').append('<br>' + $('<div/>').text('Address: ' + msg.address + ', signal quality: ' + msg.signal_quality + ', error count: ' + msg.error_count).html());
     });
@@ -24,7 +26,6 @@ $(document).ready(function() {
     </script>
 {% endblock %}
 
-
 {% block app_content %}
 	<div class="container">
     <form id="emit" method="POST" action='#'>
@@ -36,5 +37,4 @@ $(document).ready(function() {
     <label for="log">Receive:</label>
     <div id="log"></div>
     </div>
- 
  {% endblock %}
