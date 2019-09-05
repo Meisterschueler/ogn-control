@@ -12,31 +12,49 @@ $(document).ready(function() {
 
     var graphDiv = document.getElementById('plotly_chart')
     var min_gapsize = 1000;
-    var devices = {};
+    var max_timestamp = null;
+    var next_trace_id = 0
+    var trace_ids = {};
     
     Plotly.plot(graphDiv, []);
     
-    var next_trace_id = 0
     socket.on('ogn_data', function(msg) {
+        var address = msg.address
         var timestamp = new Date(msg.timestamp*1000);
+        var value = msg.signal_quality;
 
-        if (msg.address in devices) {
-            device = devices[msg.address];
-            trace_id = device.trace_id
-            if (timestamp.getTime() - device['timestamp'].getTime() > min_gapsize) {
-                Plotly.extendTraces(graphDiv, {y: [[null]]}, [trace_id])
-            }
-            Plotly.extendTraces(graphDiv, {x: [[timestamp]], y: [[msg.signal_quality]]}, [device.trace_id])
-            devices[msg.address]['timestamp'] = timestamp;
-        } else {
+        // add trace or append data if trace already exists
+        if (!(address in trace_ids)) {
+            trace_ids[address] = next_trace_id;
+            next_trace_id += 1;
             Plotly.addTraces(graphDiv, [{
                 x: [timestamp],
-                y: [msg.signal_quality],
+                y: [value],
                 mode: 'lines+markers',
-                name: msg.address,
+                name: address,
             }]);
-            devices[msg.address] = {'trace_id': next_trace_id, 'timestamp': timestamp}
-            next_trace_id += 1;
+        } else {
+            trace_id = trace_ids[address];
+            if (timestamp.getTime() - graphDiv.data[trace_id].x[graphDiv.data[trace_id].x.length - 1].getTime() > min_gapsize) {
+                Plotly.extendTraces(graphDiv, {y: [[null]]}, [trace_id]);
+            }
+            Plotly.extendTraces(graphDiv, {x: [[timestamp]], y: [[value]]}, [trace_id])
+        }
+        
+        // update layout
+        if (max_timestamp == null || max_timestamp < timestamp) {
+            max_timestamp = timestamp;
+            var startTime = new Date(timestamp.getTime() - 55000);
+            var endTime = new Date(timestamp.getTime() + 5000);
+            
+            var minuteView = {
+                xaxis: {
+                  type: 'date',
+                  range: [startTime, endTime]
+                }
+            };
+            
+            Plotly.relayout(graphDiv, minuteView);
         }
     });
 }); 
