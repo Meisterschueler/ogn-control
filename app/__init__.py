@@ -20,19 +20,16 @@ thread = None
 mypath = os.path.dirname(os.path.realpath(__file__))
 
 
-def background_thread2():
+def emit_test_data():
+    """Emits test data from static file for testing purposes."""
+    
     data_strings = [line.rstrip("\n") for line in open(os.path.join(mypath, "telnet_logfile.txt"))]
     timestamp = None
 
     for raw_message in data_strings:
-        try:
-            message = parse(raw_message)
-        except Exception:
-            # print("Could not parse %s" % raw_message)
-            continue
+        message = parse(raw_message)
 
         if not message:
-            # print("WTF: %s" % raw_message)
             continue
 
         message["timestamp"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
@@ -46,7 +43,9 @@ def background_thread2():
             socketio.sleep(1.0)
 
 
-def background_thread():
+def emit_real_data():
+    """Connects with telnet client and emit 'real' data."""
+    
     def callback(raw_message):
         message = parse(raw_message)
         if not message:
@@ -64,7 +63,10 @@ def background_thread():
 def test_connect():
     global thread
     if thread is None:
-        thread = socketio.start_background_task(target=background_thread2)
+        if app.config['DEBUG']:
+            thread = socketio.start_background_task(target=emit_test_data)
+        else:
+            thread = socketio.start_background_task(target=emit_real_data)
     emit("my_response", {"data": "Connected", "count": 0})
 
 
@@ -82,3 +84,7 @@ def plotly():
 @app.route("/messages.html")
 def messages():
     return render_template("messages.html", title="Messages")
+
+@app.route("/fullscreen.html")
+def fullscreen():
+    return render_template("fullscreen.html", title="Fullscreen")
