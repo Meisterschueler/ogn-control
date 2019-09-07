@@ -52,6 +52,7 @@ def emit_real_data():
             print("Could not parse %s" % raw_message)
             return
 
+        message["timestamp"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
         socketio.emit("ogn_data", message, namespace="/test")
 
     client = TelnetClient()
