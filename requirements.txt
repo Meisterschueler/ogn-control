@@ -1,5 +1,5 @@
-Flask==1.1.1
-Flask-SocketIO==4.3.0
-eventlet==0.25.1
-Flask-Bootstrap==3.3.7.1
-ogn-client==0.9.7
+# Install ogn-control
+-e .
+
+# Install development requirements
+-e .[dev]
