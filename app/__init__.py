@@ -22,7 +22,7 @@ here = os.path.dirname(os.path.realpath(__file__))
 
 def emit_test_data():
     """Emits test data from static file for testing purposes."""
-    
+
     timestamp = None
 
     for line in open(os.path.join(here, "telnet_logfile.txt")):
@@ -46,7 +46,7 @@ def emit_test_data():
 
 def emit_realtime_data():
     """Connects with telnet client and emit realtime data."""
-    
+
     def callback(raw_message):
         message = parse(raw_message)
         if not message:
