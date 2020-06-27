@@ -32,6 +32,12 @@ class Test(unittest.TestCase):
             expected_state = message['expected_state']
             self.assertEqual(expected_state, state)
 
+        takeoff_landings = state_machine.takeoff_landings
+        self.assertEqual(len(takeoff_landings), 1)
+        self.assertEqual(takeoff_landings[0].address, 'DD1234')
+        self.assertEqual(takeoff_landings[0].timestamp, datetime(2020, 6, 27, 10, 31, 20))
+        self.assertTrue(takeoff_landings[0].is_takeoff)
+
     def test_simple_landing(self):
         """One plane makes one landing."""
 
@@ -58,6 +64,12 @@ class Test(unittest.TestCase):
             state = state_machine.get_state(address='DD1234')
             expected_state = message['expected_state']
             self.assertEqual(expected_state, state)
+
+        takeoff_landings = state_machine.takeoff_landings
+        self.assertEqual(len(takeoff_landings), 1)
+        self.assertEqual(takeoff_landings[0].address, 'DD1234')
+        self.assertEqual(takeoff_landings[0].timestamp, datetime(2020, 6, 27, 10, 31, 30))
+        self.assertFalse(takeoff_landings[0].is_takeoff)
 
     def test_aborted_whinch_launch(self):
         """One plane makes a whinch launch which is interrupted."""

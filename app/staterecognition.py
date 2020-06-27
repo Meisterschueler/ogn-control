@@ -1,6 +1,13 @@
 import enum
 
 
+class TakeoffLanding():
+    def __init__(self, address, timestamp, is_takeoff):
+        self.address = address
+        self.timestamp = timestamp
+        self.is_takeoff = is_takeoff
+
+
 class State(enum.Enum):
     UNKNOWN, GROUND, MOVING, STARTING, AIRBORNE, LANDING, \
         ABORTING_START, ABORTING_LANDING = range(8)
@@ -12,6 +19,7 @@ class StateMachine():
         self.max_last_messages = max_last_messages
 
         self.aircrafts = {}
+        self.takeoff_landings = []
 
     def add_message(self, message):
         address = message['address']
@@ -96,6 +104,15 @@ class StateMachine():
                 state = State.UNKNOWN
         else:
             state = State.UNKNOWN
+
+        if last_state == State.STARTING and state == State.AIRBORNE:
+            print("Started: {}".format(message))
+            takeoff = TakeoffLanding(address=message['address'], timestamp=message['timestamp'], is_takeoff=True)
+            self.takeoff_landings.append(takeoff)
+        elif last_state == State.LANDING and state == State.MOVING:
+            print("Landed: {}".format(message))
+            landing = TakeoffLanding(address=message['address'], timestamp=message['timestamp'], is_takeoff=False)
+            self.takeoff_landings.append(landing)
 
         self.aircrafts[address]['state'] = state
         self.aircrafts[address]['messages'].append(message)
