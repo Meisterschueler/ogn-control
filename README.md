@@ -10,11 +10,41 @@ It runs on the receiver and visualizes the incoming data
 
 ## Installation
 
-ogn-control is available at PyPI. So for installation simply use pip:
+Clone the repository
 
 ```
-pip install ogn-control
+git clone https://github.com/Meisterschueler/ogn-control
 ```
+
+Create a virtual environment (not nessecary, but recommended) and activate
+
+```
+python3 -m venv my_environment
+source my_environment/bin/activate
+```
+
+Install all the packages we need
+
+```
+pip install -r requirements.txt
+```
+
+Start the flask server
+
+```
+export FLASK_APP=ogn_control.py
+flask run
+```
+
+The application is now running and proceed the raw data directly from port 50001 (default port of ogn-decode process).
+If you want to develop, set the Flask environment from production (default) to development before starting Flask.
+
+```
+export FLASK_ENV=development
+```
+
+Now instead of realtime data from OGN receiver data from logfile "app/telnet_logfile.txt" is proceeded.
+
 
 ## License
 Licensed under the [AGPLv3](LICENSE).
