@@ -2,13 +2,15 @@ import enum
 
 
 class State(enum.Enum):
-    UNKNOWN, GROUND, MOVING, STARTING, AIRBORNE, LANDING = range(6)
+    UNKNOWN, GROUND, MOVING, STARTING, AIRBORNE, LANDING, \
+        ABORTING_START, ABORTING_LANDING = range(8)
 
 
 class StateMachine():
     def __init__(self, elevation=0, max_last_messages=10):
         self.elevation = elevation
         self.max_last_messages = max_last_messages
+
         self.aircrafts = {}
 
     def add_message(self, message):
@@ -67,6 +69,8 @@ class StateMachine():
                 state = State.STARTING
             elif ground_speed >= min_airborne_speed and altitude >= min_airborne_altitude:
                 state = State.AIRBORNE
+            elif ground_speed < min_airborne_altitude and altitude < min_airborne_altitude:
+                state = State.ABORTING_START
             else:
                 state = State.UNKNOWN
         elif last_state == State.AIRBORNE:
@@ -80,6 +84,13 @@ class StateMachine():
             if ground_speed >= min_airborne_speed and altitude < min_airborne_altitude:
                 state = State.LANDING
             elif ground_speed < min_airborne_speed and ground_speed >= min_moving_speed and altitude < min_airborne_altitude:
+                state = State.MOVING
+            else:
+                state = State.UNKNOWN
+        elif last_state == State.ABORTING_START:
+            if ground_speed < min_moving_speed and altitude < min_airborne_altitude:
+                state = State.GROUND
+            elif ground_speed < min_airborne_speed and altitude < min_airborne_altitude:
                 state = State.MOVING
             else:
                 state = State.UNKNOWN
