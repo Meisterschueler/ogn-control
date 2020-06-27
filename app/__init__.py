@@ -8,9 +8,18 @@ from flask_bootstrap import Bootstrap
 from ogn.client.client import TelnetClient
 from ogn.parser.telnet_parser import parse
 
+from config import configs
+from app.staterecognition import StateMachine
 
+
+# Create the app
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "secret!"
+
+# Load the configuration
+config_name = app.config['ENV']
+configuration = configs[config_name]
+app.config.from_object(configuration)
+
 socketio = SocketIO(app)
 bootstrap = Bootstrap(app)
 
@@ -18,6 +27,7 @@ thread = None
 
 
 here = os.path.dirname(os.path.realpath(__file__))
+state_machine = StateMachine(elevation=app.config['ELEVATION'])
 
 
 def emit_test_data():
@@ -30,9 +40,11 @@ def emit_test_data():
         message = parse(raw_message)
 
         if not message:
-            print("Could not parse: {}".format(raw_message))
+            if not raw_message.startswith('APRS'):
+                print("Could not parse: {}".format(raw_message))
             continue
 
+        state_machine.add_message(message)
         message["timestamp"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
 
         if timestamp is None:
@@ -50,9 +62,11 @@ def emit_realtime_data():
     def callback(raw_message):
         message = parse(raw_message)
         if not message:
-            print("Could not parse: {}".format(raw_message))
+            if not raw_message.startswith('APRS'):
+                print("Could not parse: {}".format(raw_message))
             return
 
+        state_machine.add_message(message)
         message["timestamp"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
         socketio.emit("ogn_data", message, namespace="/ogn")
 
@@ -75,14 +89,24 @@ def client_connect():
 @app.route("/")
 @app.route("/flot.html")
 def flot():
-    return render_template("flot.html", title="Flot")
+    return render_template("flot.html",
+                           title="Flot")
 
 
 @app.route("/plotly.html")
 def plotly():
-    return render_template("plotly.html", title="Plotly")
+    return render_template("plotly.html",
+                           title="Plotly")
 
 
 @app.route("/messages.html")
 def messages():
-    return render_template("messages.html", title="Messages")
+    return render_template("messages.html",
+                           title="Messages")
+
+
+@app.route("/logbook.html")
+def logbook():
+    return render_template("logbook.html",
+                           title="Logbook",
+                           logbook=state_machine.takeoff_landings)

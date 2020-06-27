@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+	<table>
+	<tr><th>Address</th><th>Timestamp</th><th>Takeoff</th></tr>
+	{% for entry in logbook %}
+	<tr><td>{{ entry.address }}</td><td>{{ entry.timestamp }}</td><td>{{ entry.is_takeoff }}</td></tr>
+	{% endfor %}
+	</table>
+ {% endblock %}
