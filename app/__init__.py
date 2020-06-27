@@ -17,19 +17,20 @@ bootstrap = Bootstrap(app)
 thread = None
 
 
-mypath = os.path.dirname(os.path.realpath(__file__))
+here = os.path.dirname(os.path.realpath(__file__))
 
 
 def emit_test_data():
     """Emits test data from static file for testing purposes."""
     
-    data_strings = [line.rstrip("\n") for line in open(os.path.join(mypath, "telnet_logfile.txt"))]
     timestamp = None
 
-    for raw_message in data_strings:
+    for line in open(os.path.join(here, "telnet_logfile.txt")):
+        raw_message = line.rstrip("\n")
         message = parse(raw_message)
 
         if not message:
+            print(f"Could not parse: {raw_message}")
             continue
 
         message["timestamp"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
@@ -37,38 +38,38 @@ def emit_test_data():
         if timestamp is None:
             timestamp = message["timestamp"]
 
-        socketio.emit("ogn_data", message, namespace="/test")
+        socketio.emit("ogn_data", message, namespace="/ogn")
         if timestamp != message["timestamp"]:
             timestamp = message["timestamp"]
             socketio.sleep(1.0)
 
 
-def emit_real_data():
-    """Connects with telnet client and emit 'real' data."""
+def emit_realtime_data():
+    """Connects with telnet client and emit realtime data."""
     
     def callback(raw_message):
         message = parse(raw_message)
         if not message:
-            print("Could not parse %s" % raw_message)
+            print(f"Could not parse: {raw_message}")
             return
 
         message["timestamp"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
-        socketio.emit("ogn_data", message, namespace="/test")
+        socketio.emit("ogn_data", message, namespace="/ogn")
 
     client = TelnetClient()
     client.connect()
     client.run(callback=callback)
 
 
-@socketio.on("connect", namespace="/test")
-def test_connect():
+@socketio.on("connect", namespace="/ogn")
+def client_connect():
     global thread
     if thread is None:
         if app.config['DEBUG']:
             thread = socketio.start_background_task(target=emit_test_data)
         else:
-            thread = socketio.start_background_task(target=emit_real_data)
-    emit("my_response", {"data": "Connected", "count": 0})
+            thread = socketio.start_background_task(target=emit_realtime_data)
+    emit("server_response", {"data": "Connected", "count": 0})
 
 
 @app.route("/")
@@ -85,7 +86,3 @@ def plotly():
 @app.route("/messages.html")
 def messages():
     return render_template("messages.html", title="Messages")
-
-@app.route("/fullscreen.html")
-def fullscreen():
-    return render_template("fullscreen.html", title="Fullscreen")
