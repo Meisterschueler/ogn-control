@@ -30,7 +30,7 @@ def emit_test_data():
         message = parse(raw_message)
 
         if not message:
-            print(f"Could not parse: {raw_message}")
+            print("Could not parse: {}".format(raw_message))
             continue
 
         message["timestamp"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
@@ -50,7 +50,7 @@ def emit_realtime_data():
     def callback(raw_message):
         message = parse(raw_message)
         if not message:
-            print(f"Could not parse: {raw_message}")
+            print("Could not parse: {}".format(raw_message))
             return
 
         message["timestamp"] = int(message["timestamp"].replace(tzinfo=timezone.utc).timestamp())
