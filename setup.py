@@ -36,7 +36,7 @@ setup(
     packages=['ogn.{}'.format(package) for package in find_packages(where='ogn')],
     python_requires='>=3',
     install_requires=[
-        'Flask==1.1.1',
+        'Flask==1.1.2',
         'Flask-SocketIO==4.3.0',
         'eventlet==0.25.2',
         'Flask-Bootstrap==3.3.7.1',
