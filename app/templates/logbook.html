@@ -2,9 +2,9 @@
 
 {% block app_content %}
 	<table>
-	<tr><th>Address</th><th>Timestamp</th><th>Takeoff</th></tr>
+	<tr><th>Address</th><th>Takeoff</th><th>Landing</th></tr>
 	{% for entry in logbook %}
-	<tr><td>{{ entry.address }}</td><td>{{ entry.timestamp }}</td><td>{{ entry.is_takeoff }}</td></tr>
+	<tr><td>{{ entry.address }}</td><td>{{ entry.takeoff_timestamp }}</td><td>{{ entry.landing_timestamp }}</td></tr>
 	{% endfor %}
 	</table>
  {% endblock %}

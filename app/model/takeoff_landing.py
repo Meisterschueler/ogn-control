@@ -6,3 +6,6 @@ class TakeoffLanding():
 
     def __str__(self):
         return "TakeoffLanding(address='{address}', timestamp='{timestamp}', is_takeoff='{is_takeoff}')".format(**self.__dict__)
+
+    def __lt__(self, other):
+        return self.timestamp < other.timestamp

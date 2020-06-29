@@ -10,6 +10,7 @@ from ogn.parser.telnet_parser import parse
 
 from config import configs
 from app.staterecognition import StateMachine
+from app.logbook_generator import create_logbook
 
 
 # Create the app
@@ -107,6 +108,8 @@ def messages():
 
 @app.route("/logbook.html")
 def logbook():
+    takeoff_landings = state_machine.takeoff_landings
+    logbook = create_logbook(takeoff_landings)
     return render_template("logbook.html",
                            title="Logbook",
-                           logbook=state_machine.takeoff_landings)
+                           logbook=logbook)
