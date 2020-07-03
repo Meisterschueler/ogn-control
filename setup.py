@@ -37,7 +37,7 @@ setup(
     python_requires='>=3',
     install_requires=[
         'Flask==1.1.2',
-        'Flask-SocketIO==4.3.0',
+        'Flask-SocketIO==4.3.1',
         'eventlet==0.25.2',
         'Flask-Bootstrap==3.3.7.1',
         'ogn-client==0.9.7'
