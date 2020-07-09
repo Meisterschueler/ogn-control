@@ -11,17 +11,21 @@ $(document).ready(function() {
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
 
     var graphDiv = document.getElementById('plotly_chart')
-    var min_gapsize = 1000;
+    var max_gapsize = 2000;
     var max_timestamp = null;
     var next_trace_id = 0
     var trace_ids = {};
     
+    var new_data = {};
+    
     Plotly.plot(graphDiv, []);
     
     socket.on('ogn_data', function(msg) {
-        var address = msg.address
-        var timestamp = new Date(msg.timestamp*1000);
+        var address = msg.address;
+        var timestamp = new Date(msg.timestamp*1000 + msg.pps_offset*1000);
         var value = msg.signal_quality;
+        
+        max_timestamp = timestamp;
 
         // add trace or append data if trace already exists
         if (!(address in trace_ids)) {
@@ -35,28 +39,62 @@ $(document).ready(function() {
             }]);
         } else {
             trace_id = trace_ids[address];
-            if (timestamp.getTime() - graphDiv.data[trace_id].x[graphDiv.data[trace_id].x.length - 1].getTime() > min_gapsize) {
-                Plotly.extendTraces(graphDiv, {y: [[null]]}, [trace_id]);
+            
+            var last_timestamp = null;
+            if (!(trace_id in new_data)) {
+            	last_timestamp = graphDiv.data[trace_id]['x'][graphDiv.data[trace_id]['x'].length - 1];
+            } else {
+            	last_timestamp = new_data[trace_id]['x'][new_data[trace_id]['x'].length - 1];
             }
-            Plotly.extendTraces(graphDiv, {x: [[timestamp]], y: [[value]]}, [trace_id])
-        }
-        
-        // update layout
-        if (max_timestamp == null || max_timestamp < timestamp) {
-            max_timestamp = timestamp;
-            var startTime = new Date(timestamp.getTime() - 55000);
-            var endTime = new Date(timestamp.getTime() + 5000);
             
-            var minuteView = {
-                xaxis: {
-                  type: 'date',
-                  range: [startTime, endTime]
-                }
-            };
-            
-            Plotly.relayout(graphDiv, minuteView);
+            var xi = [];
+            var yi = [];
+        	gapsize = timestamp.getTime() - last_timestamp;
+            if (gapsize > max_gapsize) {
+                xi.push(timestamp - max_gapsize/2);
+        		yi.push(null);
+            }
+            xi.push(timestamp);
+            yi.push(value);
+
+            if (!(trace_id in new_data)) {
+            	new_data[trace_id] = {'x': xi, 'y': yi};
+            } else {
+            	new_data[trace_id]['x'].push(xi);
+            	new_data[trace_id]['y'].push(yi);
+            }
         }
     });
+    
+    setInterval(function() {
+    	var data = {'x': [], 'y': []};
+    	var trace_ids = [];
+    	for (var trace_id in new_data) {
+    		trace_id = parseInt(trace_id);
+    		xi = new_data[trace_id]['x'];
+    		yi = new_data[trace_id]['y'];
+    		data['x'].push(xi);
+    		data['y'].push(yi);
+    		trace_ids.push(trace_id);
+    	};
+    
+    	Plotly.extendTraces(graphDiv, data, trace_ids);
+    	new_data = {};
+    
+        var startTime = new Date(max_timestamp - 55000);
+        var endTime = new Date(max_timestamp + 5000);
+        
+        var minuteView = {
+            xaxis: {
+              type: 'date',
+              range: [startTime, endTime]
+            }
+        };
+        
+        Plotly.relayout(graphDiv, minuteView);
+        
+        max_timestamp = max_timestamp + 1000;
+    }, 1000);
 }); 
 
     </script>
