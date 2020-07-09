@@ -15,11 +15,7 @@ class StateMachine():
             self.aircrafts[address] = {'state': State.UNKNOWN, 'messages': [message]}
             return
 
-        last_state = self.aircrafts[address]['state']
-        last_message = self.aircrafts[address]['messages'][-1]
-        last_ground_speed = last_message['ground_speed']
-        last_altitude = last_message['altitude']
-
+        # Calculate current aircraft data and limits
         ground_speed = message['ground_speed']
         altitude = message['altitude']
 
@@ -27,6 +23,13 @@ class StateMachine():
         min_moving_speed = 10
         min_airborne_speed = 30
 
+        # Get the last valid aircraft data
+        last_state = self.aircrafts[address]['state']
+        last_messages = self.aircrafts[address]['messages']
+        last_ground_speed = last_messages[-1]['ground_speed']
+        last_altitude = last_messages[-1]['altitude']
+
+        # Calculate the current state of the aircraft
         if last_state == State.UNKNOWN:
             if last_ground_speed < min_moving_speed and last_altitude < min_airborne_altitude:
                 if ground_speed < min_moving_speed and altitude < min_airborne_altitude:
@@ -93,6 +96,15 @@ class StateMachine():
         else:
             state = State.UNKNOWN
 
+        # Set the new aircraft data
+        self.aircrafts[address]['state'] = state
+
+        messages = last_messages + [message]
+        while len(messages) > self.max_last_messages:
+            messages = messages[1:]
+        self.aircrafts[address]['messages'] = messages
+
+        # Add takeoff or landing event if recognized
         if last_state == State.STARTING and state == State.AIRBORNE:
             takeoff = TakeoffLanding(address=message['address'], timestamp=message['timestamp'], is_takeoff=True)
             print("Started: {}".format(takeoff))
@@ -101,9 +113,6 @@ class StateMachine():
             landing = TakeoffLanding(address=message['address'], timestamp=message['timestamp'], is_takeoff=False)
             print("Landed: {}".format(landing))
             self.takeoff_landings.append(landing)
-
-        self.aircrafts[address]['state'] = state
-        self.aircrafts[address]['messages'].append(message)
 
     def get_state(self, address):
         return self.aircrafts[address]['state'] if address in self.aircrafts else None
