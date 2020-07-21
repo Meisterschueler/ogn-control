@@ -33,10 +33,11 @@ Start the flask server
 
 ```
 export FLASK_APP=ogn_control.py
-flask run
+flask run --port=5000 --host=0.0.0.0
 ```
 
-The application is now running and proceed the raw data directly from port 50001 (default port of ogn-decode process).
+The application is now running on port 5000 (port is 5000 per default) and is accessible from every ip (host is 127.0.0.1 per default,
+this restricts access to localhost). It proceeds the raw data directly from port 50001 (default port of ogn-decode process).
 If you want to develop, set the Flask environment from production (default) to development before starting Flask.
 
 ```
