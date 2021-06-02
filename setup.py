@@ -41,7 +41,7 @@ setup(
         'dnspython==1.16.0,<2.0',       # on rpi eventlet depends on dnspython which requires python 3.6
         'eventlet==0.25.2',
         'Flask-Bootstrap==3.3.7.1',
-        'ogn-client==1.0.1'
+        'ogn-client==1.2.0'
         ],
     extras_require={
         'dev': [
