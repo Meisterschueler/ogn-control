@@ -37,7 +37,7 @@ setup(
     python_requires='>=3',
     install_requires=[
         'Flask==1.1.2',
-        'Flask-SocketIO==4.3.1',
+        'Flask-SocketIO==5.1.1',
         'dnspython==1.16.0,<2.0',       # on rpi eventlet depends on dnspython which requires python 3.6
         'eventlet==0.25.2',
         'Flask-Bootstrap==3.3.7.1',
