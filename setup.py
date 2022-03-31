@@ -36,7 +36,7 @@ setup(
     packages=['ogn.{}'.format(package) for package in find_packages(where='ogn')],
     python_requires='>=3',
     install_requires=[
-        'Flask==1.1.2',
+        'Flask==2.1.1',
         'Flask-SocketIO==4.3.1',
         'dnspython==1.16.0,<2.0',       # on rpi eventlet depends on dnspython which requires python 3.6
         'eventlet==0.25.2',
